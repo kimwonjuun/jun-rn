@@ -11,7 +11,8 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function App() {
     // 1. Add todo
@@ -23,7 +24,7 @@ export default function App() {
     // ******************************************
     // TextInput 의 onChangeText={setText} 부분
     // const changeText = (text) => {
-    //   setText(text)
+    // setText(text)
     // }
 
     // ===
@@ -33,7 +34,7 @@ export default function App() {
 
     // 2. Set Category
     // category: JavaScript, React, CodingTest
-    const [category, setCategory] = useState('JavaScript');
+    const [category, setCategory] = useState('');
     // console.log('category', category);
     const [editText, setEditText] = useState('');
     // console.log('editText', editText);
@@ -107,16 +108,43 @@ export default function App() {
         ]);
     };
 
+    // 6.~~~~~~~~~~~~~~~~~~
+    const setCat = async (cat) => {
+        console.log('cat:', cat);
+        setCategory(cat);
+        await AsyncStorage.setItem('category', cat);
+    };
+
+    useEffect(() => {
+        // npm install @react-native-async-storage/async-storage 명령어로 AsyncStorage import 후 과정임
+        // 6. 현재의 최신 todos 를 AsyncStorage 에 저장
+        const saveTodos = async () => {
+            await AsyncStorage.setItem('todos', JSON.stringify(todos));
+        };
+        if (todos.length > 0) saveTodos();
+    }, [todos]);
+
+    useEffect(() => {
+        const getData = async () => {
+            const resp_todos = await AsyncStorage.getItem('todos'); // todos 배열
+            const resp_cat = await AsyncStorage.getItem('category'); // undefined / null
+
+            setTodos(JSON.parse(resp_todos) ?? []);
+            setCategory(resp_cat ?? 'js');
+        };
+        getData();
+    }, []);
+
     return (
         <SafeAreaView style={styles.safearea}>
             {/* SafeAreaView: 없으면 노치가 있는 휴대폰에 UI가 겹침. 자동
-            계산을 해서 디바이스 특징을 인식해 패딩을 준 것임. 패딩 등 css
-            속성이 적용되지 않음. 안드로이드만을 개발할 것이라면 없어도 괜찮음. */}
+    계산을 해서 디바이스 특징을 인식해 패딩을 준 것임. 패딩 등 css
+    속성이 적용되지 않음. 안드로이드만을 개발할 것이라면 없어도 괜찮음. */}
             <StatusBar style="auto" />
             <View style={styles.container}>
                 <View style={styles.tabs}>
                     <TouchableOpacity
-                        onPress={() => setCategory('JavaScript')}
+                        onPress={() => setCat('JavaScript')}
                         style={{
                             ...styles.tab,
                             backgroundColor:
@@ -127,7 +155,7 @@ export default function App() {
                         <Text style={styles.tabText}>Javascript</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
-                        onPress={() => setCategory('React')}
+                        onPress={() => setCat('React')}
                         style={{
                             ...styles.tab,
                             backgroundColor:
@@ -137,7 +165,7 @@ export default function App() {
                         <Text style={styles.tabText}>React</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
-                        onPress={() => setCategory('Coding Test')}
+                        onPress={() => setCat('Coding Test')}
                         style={{
                             ...styles.tab,
                             backgroundColor:
@@ -158,9 +186,9 @@ export default function App() {
                 </View>
                 <ScrollView>
                     {/* .filter((todo) => todo.category === category)
-                    if문 대신 filter 를 써도 같음.
-                    tmi. JS 배열 중 map, filter, reduce, forEach 등은 모든 []의 요소를 순회할 때까지 멈추지 않음. filter => map 을 돌리면 더 반복할 수 밖에 없음.
-                    그래서 map 안에 if 문을 돌리는게 성능적으로 좋다. */}
+            if문 대신 filter 를 써도 같음.
+            tmi. JS 배열 중 map, filter, reduce, forEach 등은 모든 []의 요소를 순회할 때까지 멈추지 않음. filter => map 을 돌리면 더 반복할 수 밖에 없음.
+            그래서 map 안에 if 문을 돌리는게 성능적으로 좋다. */}
                     {todos.map((todo) => {
                         if (todo.category === category) {
                             return (
