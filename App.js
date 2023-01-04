@@ -2,6 +2,7 @@ import { StatusBar } from 'expo-status-bar';
 import { AntDesign } from '@expo/vector-icons';
 import { Feather } from '@expo/vector-icons';
 import {
+    Alert,
     SafeAreaView,
     ScrollView,
     StyleSheet,
@@ -56,6 +57,31 @@ export default function App() {
         const idx = newTodos.findIndex((todo) => todo.id === id);
         newTodos[idx].isDone = !newTodos[idx].isDone;
         setTodos(newTodos);
+    };
+    const deleteTodo = (id) => {
+        // Alert API 사용
+        Alert.alert('Todo 삭제', '정말 삭제하시겠습니까?', [
+            {
+                // 좌클릭
+                text: '취소',
+                style: 'cancel',
+                onPress: () => console.log('취소 클릭!'),
+            },
+            {
+                // 우클릭
+                text: '삭제',
+                style: 'destructive',
+                onPress: () => {
+                    // 4. Delete Todo
+                    // 삭제 이모티콘 터치 시 해당 todo 삭제
+                    // 4-1. id 값을 받아서 해당 배열 요소를 제외한 나머지를 새로운 배열로 받는다
+                    // 4-2. 새로운 배열로 setTodos
+                    // 얕은 복사 하지 않고 바로 tods 쓰는 이유 : filter method 는 immutable. todos 에 영향을 미치지 못함
+                    const newTodos = todos.filter((todo) => todo.id !== id);
+                    setTodos(newTodos);
+                },
+            },
+        ]);
     };
 
     return (
@@ -141,12 +167,16 @@ export default function App() {
                                             size={24}
                                             color="black"
                                         />
-                                        <AntDesign
-                                            style={{ marginLeft: 10 }}
-                                            name="delete"
-                                            size={24}
-                                            color="black"
-                                        />
+                                        <TouchableOpacity
+                                            onPress={() => deleteTodo(todo.id)}
+                                        >
+                                            <AntDesign
+                                                style={{ marginLeft: 10 }}
+                                                name="delete"
+                                                size={24}
+                                                color="black"
+                                            />
+                                        </TouchableOpacity>
                                     </View>
                                 </View>
                             );
