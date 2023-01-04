@@ -35,7 +35,8 @@ export default function App() {
     // category: JavaScript, React, CodingTest
     const [category, setCategory] = useState('JavaScript');
     // console.log('category', category);
-
+    const [editText, setEditText] = useState('');
+    // console.log('editText', editText);
     const newTodo = {
         id: Date.now(),
         text,
@@ -56,6 +57,28 @@ export default function App() {
         const newTodos = [...todos];
         const idx = newTodos.findIndex((todo) => todo.id === id);
         newTodos[idx].isDone = !newTodos[idx].isDone;
+        setTodos(newTodos);
+    };
+    const setEdit = (id) => {
+        // 5. Edit Task. 3. setDone과 로직은 같다.
+        // 수정 토글링
+        // 5-1. id를 매개변수로 받는다
+        // 5-2. id에 해당하는 배열의 요소를 찾는다
+        // 5-3. 그 배열의 요소의 isEdit 값을 토글링한 후에 setTodos
+        // 5.4. UI 에 함수 적용 후 변경할 내용 useState 로 생성해 줘야함
+        const newTodos = [...todos];
+        const idx = newTodos.findIndex((todo) => todo.id === id);
+        newTodos[idx].isEdit = !newTodos[idx].isEdit;
+        setTodos(newTodos);
+    };
+    const editTodo = (id) => {
+        // 5.~ 의 setEdit 과정 끝난 후 enter 입력 시 todo 를 edit 하는 과정
+        // 5.~ 1. id 값을 매개변수로 받아서 해당 배열의 요소를 찾는다. idx 찾기
+        // 5.~ 2. todos[idx].text = editText;
+        const newTodos = [...todos];
+        const idx = newTodos.findIndex((todo) => todo.id === id);
+        newTodos[idx].text = editText;
+        newTodos[idx].isEdit = false;
         setTodos(newTodos);
     };
     const deleteTodo = (id) => {
@@ -109,7 +132,7 @@ export default function App() {
                             ...styles.tab,
                             backgroundColor:
                                 category === 'React' ? '#4287f5' : 'grey',
-                        }} // 버튼 backgroundColor에 삼항연산자 적용
+                        }}
                     >
                         <Text style={styles.tabText}>React</Text>
                     </TouchableOpacity>
@@ -142,15 +165,30 @@ export default function App() {
                         if (todo.category === category) {
                             return (
                                 <View style={styles.task} key={todo.id}>
-                                    <Text
-                                        style={{
-                                            textDecorationLine: todo.isDone
-                                                ? 'line-through'
-                                                : 'none',
-                                        }} // 인자로 넣은 todo 에 textDecorationLine 삼항연산자 적용
-                                    >
-                                        {todo.text}
-                                    </Text>
+                                    {todo.isEdit ? (
+                                        <TextInput
+                                            value={editText}
+                                            onChangeText={setEditText}
+                                            onSubmitEditing={() =>
+                                                editTodo(todo.id)
+                                            }
+                                            style={{
+                                                backgroundColor: 'white',
+                                                flex: 1,
+                                            }}
+                                        />
+                                    ) : (
+                                        <Text
+                                            style={{
+                                                textDecorationLine: todo.isDone
+                                                    ? 'line-through'
+                                                    : 'none',
+                                            }}
+                                        >
+                                            {todo.text}
+                                        </Text>
+                                    )}
+
                                     <View style={{ flexDirection: 'row' }}>
                                         <TouchableOpacity
                                             onPress={() => setDone(todo.id)}
@@ -161,12 +199,17 @@ export default function App() {
                                                 color="black"
                                             />
                                         </TouchableOpacity>
-                                        <Feather
-                                            style={{ marginLeft: 10 }}
-                                            name="edit"
-                                            size={24}
-                                            color="black"
-                                        />
+                                        <TouchableOpacity
+                                            onPress={() => setEdit(todo.id)}
+                                        >
+                                            <Feather
+                                                style={{ marginLeft: 10 }}
+                                                name="edit"
+                                                size={24}
+                                                color="black"
+                                            />
+                                        </TouchableOpacity>
+
                                         <TouchableOpacity
                                             onPress={() => deleteTodo(todo.id)}
                                         >
